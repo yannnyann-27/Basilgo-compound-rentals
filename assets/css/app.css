@@ -1,0 +1,62 @@
+/* Basilgo Compound - raw CSS that Tailwind utilities can't express (keyframes, table stacking, print).
+   Components + theme live in includes/head.php (Tailwind config + @apply). */
+
+/* ---- motion ---- */
+@keyframes rise  { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes fade  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pop   { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
+@keyframes slide { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
+@keyframes drift { to { transform: translate(40px, 30px) scale(1.2); } }
+@keyframes bar   { from { width: 100%; } to { width: 0; } }
+@keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, .55); } 100% { box-shadow: 0 0 0 9px rgba(245, 158, 11, 0); } }
+@keyframes spin  { to { transform: rotate(360deg); } }
+
+.stagger > * { animation: rise .6s cubic-bezier(.22, 1, .36, 1) both; animation-delay: calc(var(--i, 0) * 70ms); }
+.rows-in > tr { animation: rise .45s cubic-bezier(.22, 1, .36, 1) both; animation-delay: calc(var(--i, 0) * 40ms); }
+.pop-in { animation: pop .5s cubic-bezier(.22, 1, .36, 1) both; animation-delay: calc(var(--i, 0) * 40ms); }
+.pulse-ring { animation: pulse-ring 2s infinite; }
+.toast-bar { position: absolute; left: 0; bottom: 0; height: 3px; background: currentColor; opacity: .35; animation: bar 4.5s linear forwards; }
+.toast.out { opacity: 0; transform: translateX(30px); transition: .3s; }
+.btn.is-loading { position: relative; color: transparent !important; }
+.btn.is-loading::after { content: ""; position: absolute; width: 1.1rem; height: 1.1rem; border: 2px solid #fff; border-right-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; }
+.btn-secondary.is-loading::after, .btn-danger.is-loading::after { border-color: #059669; border-right-color: transparent; }
+
+/* ---- layout bits ---- */
+svg { flex-shrink: 0; }
+.sidebar { background: radial-gradient(120% 40% at 0% 0%, rgba(52, 211, 153, .20), transparent 60%), linear-gradient(180deg, #064e3b -40%, #022c22 60%); }
+.sidebar.open { transform: none; }
+.nav-scroll { scrollbar-width: none; } .nav-scroll::-webkit-scrollbar { display: none; }
+.auth-art { background: radial-gradient(90% 60% at 100% 0%, rgba(52, 211, 153, .25), transparent 60%), linear-gradient(160deg, #064e3b, #022c22); }
+.orb { position: absolute; border-radius: 9999px; filter: blur(70px); animation: drift 14s ease-in-out infinite alternate; }
+select.select { appearance: none; padding-right: 2.5rem; background-repeat: no-repeat; background-position: right .8rem center; background-size: 1rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E"); }
+:focus-visible { outline: 2px solid #10b981; outline-offset: 2px; }
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; }
+* { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+input[type=number]::-webkit-inner-spin-button { opacity: .4; }
+
+/* progress ring + bars (animated by app.js) */
+.gauge circle { fill: none; stroke-width: 14; stroke-linecap: round; }
+.gauge svg { transform: rotate(-90deg); }
+.ring-arc { stroke: url(#rg); stroke-dasharray: 0 999; transition: stroke-dasharray 1.4s cubic-bezier(.22, 1, .36, 1); }
+.fill { width: 0; transition: width 1.2s cubic-bezier(.22, 1, .36, 1); }
+
+/* ---- phones: tables turn into readable cards (each <td> carries data-label) ---- */
+@media (max-width: 639px) {
+  table.stack thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  table.stack, table.stack tbody, table.stack tr, table.stack td { display: block; width: 100%; }
+  table.stack tr { padding: .85rem 1rem; border-bottom: 1px solid #e2e8f0; }
+  table.stack tr:last-child { border-bottom: 0; }
+  table.stack td { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .35rem 0; border: 0; text-align: right; }
+  table.stack td::before { content: attr(data-label); flex-shrink: 0; text-align: left; font-size: .7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #94a3b8; }
+  table.stack td:not([data-label]) { justify-content: flex-end; }
+  table.stack td:not([data-label])::before { content: none; }
+}
+
+@media print {
+  .sidebar, .topbar, .site-foot, .no-print, #sidebar-overlay, .toast { display: none !important; }
+  .lg\:pl-72 { padding-left: 0 !important; }
+  body { background: #fff; }
+  .card { box-shadow: none; border-color: #cbd5e1; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } .ring-arc { stroke-dasharray: var(--dash, 0) 999 !important; } .fill { width: var(--w, 0) !important; } }
